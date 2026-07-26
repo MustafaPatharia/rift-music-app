@@ -1,0 +1,28 @@
+// SPDX-License-Identifier: GPL-3.0-only
+//
+// AppleAI — on-device Apple Intelligence (FoundationModels, macOS 26): the
+// built-in ~3B system model, no download, nothing leaves the machine. One of
+// the providers behind the AI facade (AIStore picks); OFF until the user
+// enables it in Settings.
+
+import Foundation
+import FoundationModels
+
+enum AppleAI {
+
+    static var isAvailable: Bool {
+        SystemLanguageModel.default.availability == .available
+    }
+
+    static func hasDevanagari(_ s: String) -> Bool {
+        s.unicodeScalars.contains { (0x0900...0x097F).contains($0.value) }
+    }
+
+    /// One instruction-guided completion. Fresh session per call — no
+    /// accumulated transcript, no drift between chunks.
+    static func respond(instructions: String, to prompt: String) async throws -> String {
+        let session = LanguageModelSession(instructions: instructions)
+        let response = try await session.respond(to: prompt)
+        return response.content.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+}

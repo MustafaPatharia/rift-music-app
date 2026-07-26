@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Rift — README blocks</title>
+<style>
+  /* 2x authoring: html 32px base → all rem values render at double density,
+     GitHub downscales to a crisp retina image. */
+  html{font-size:32px;background:#07070a}
+  :root{
+    --bg:#07070a; --ink:#f5f5f7; --ink-2:rgba(245,245,247,.64); --ink-3:rgba(245,245,247,.40);
+    --hairline:rgba(255,255,255,.10);
+    --accent:#ff375f; --blue:#0a84ff; --indigo:#5856d6; --green:#30d158;
+    --font:-apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue",sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:var(--font);color:var(--ink);-webkit-font-smoothing:antialiased;
+    line-height:1.5;background:var(--bg);overflow-x:hidden}
+
+  /* every block sits in a padded frame; glows diffuse behind the glass */
+  .wrap{position:relative;width:55rem;margin:0 auto;padding:1.4rem}
+  .glow{position:absolute;border-radius:50%;filter:blur(70px);pointer-events:none;z-index:0}
+  .glow.a{width:24rem;height:24rem;top:-6rem;left:-4rem;background:radial-gradient(circle,rgba(255,55,95,.28),transparent 68%)}
+  .glow.b{width:26rem;height:26rem;bottom:-8rem;right:-5rem;background:radial-gradient(circle,rgba(88,86,214,.30),transparent 68%)}
+  .glow.c{width:20rem;height:20rem;top:30%;right:20%;background:radial-gradient(circle,rgba(10,132,255,.20),transparent 68%)}
+
+  .card{position:relative;z-index:1;border-radius:1.4rem;
+    background:radial-gradient(120% 150% at 50% 0%,rgba(255,55,95,.07),transparent 58%),rgba(255,255,255,.05);
+    border:1px solid var(--hairline);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 1.4rem 4rem rgba(0,0,0,.55)}
+
+  .kicker{font-size:.72rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--accent)}
+  h1{font-size:clamp(2.4rem,6vw,3.6rem);font-weight:700;letter-spacing:-.03em;line-height:1.02}
+  h2{font-size:1.7rem;font-weight:700;letter-spacing:-.025em}
+  .body{color:var(--ink-2);font-size:.95rem;line-height:1.6}
+  strong{color:var(--ink);font-weight:650}
+
+  /* only the hashed block shows */
+  .shot{display:none}
+  .shot:target,.shot.solo{display:block}
+
+  /* ── HERO ── */
+  #hero .card{text-align:center;padding:4rem 2.5rem 3.6rem;
+    background:radial-gradient(110% 150% at 50% 0%,rgba(255,55,95,.16),transparent 60%),rgba(255,255,255,.05)}
+  #hero .mark{display:inline-flex;align-items:center;gap:.7rem;margin-bottom:1.4rem}
+  #hero .bolt{width:2.6rem;height:2.6rem}
+  #hero .bolt path{fill:var(--accent)}
+  #hero .tag{font-size:1.3rem;color:var(--ink);margin-top:1rem;font-weight:550;letter-spacing:-.01em}
+  #hero .sub{font-size:.9rem;color:var(--ink-2);margin-top:.7rem;letter-spacing:.02em}
+  #hero .sub b{color:var(--ink);font-weight:600}
+
+  /* ── IDEA ── */
+  #idea .card{padding:2.6rem 2.4rem}
+  #idea h2{margin:.6rem 0 1.1rem}
+  #idea p+p{margin-top:1rem}
+
+  /* ── FEATURES (3 cards) ── */
+  #features{width:55rem}
+  #features .row{position:relative;z-index:1;display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}
+  .fcell{border-radius:1.1rem;padding:1.8rem 1.5rem 2rem;
+    background:rgba(255,255,255,.05);border:1px solid var(--hairline);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.07)}
+  .fcell .lbl{font-size:.66rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);margin-bottom:1.4rem;display:block}
+  .fcell h3{font-size:1.12rem;font-weight:650;letter-spacing:-.01em;margin-bottom:.6rem}
+  .fcell p{font-size:.82rem;color:var(--ink-2);line-height:1.55}
+  .fcell .bar{width:2rem;height:3px;border-radius:2px;background:var(--accent);margin-bottom:1.1rem}
+
+  /* ── CAPABILITIES table ── */
+  #caps .card{padding:1.4rem 2.2rem}
+  table{border-collapse:collapse;width:100%}
+  td{padding:1.1rem 0;border-bottom:1px solid var(--hairline);vertical-align:top}
+  tr:last-child td{border-bottom:0}
+  td.k{font-weight:650;width:15rem;color:var(--accent);padding-right:1.4rem;font-size:.9rem;letter-spacing:-.01em}
+  td.v{color:var(--ink-2);font-size:.86rem;line-height:1.55}
+  td.v em{color:var(--ink);font-style:normal}
+
+  /* ── GET RIFT ── */
+  #get .card{padding:3.2rem 2.6rem}
+  #get .note{font-size:.72rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+  #get h2{font-size:2.2rem;margin:.8rem 0 .5rem}
+  #get .lede{color:var(--ink-2);font-size:.95rem}
+  #get .methods{display:grid;grid-template-columns:1fr 1fr;gap:1.6rem;margin-top:2rem;padding-top:1.6rem;border-top:1px solid var(--hairline)}
+  #get .m h4{font-size:.95rem;font-weight:650;margin-bottom:.5rem}
+  #get .m p{font-size:.8rem;color:var(--ink-2);line-height:1.5}
+  #get .foot{font-size:.76rem;color:var(--ink-3);margin-top:1.8rem;line-height:1.6}
+
+  /* ── ARCH RULE callout ── */
+  #rule .card{padding:0;border:0;background:none;box-shadow:none}
+  #rule .callout{border-left:3px solid var(--accent);background:rgba(255,55,95,.09);
+    border-radius:.5rem;padding:1.4rem 1.6rem}
+  #rule .callout p{font-size:.9rem;color:var(--ink-2);line-height:1.6}
+
+  /* ── ROADMAP ── */
+  #road{width:55rem}
+  #road .list{position:relative;z-index:1;display:flex;flex-direction:column;gap:.6rem}
+  .ritem{display:flex;align-items:center;gap:.9rem;padding:.9rem 1.2rem;border-radius:.7rem;
+    border-left:3px solid var(--hairline);background:rgba(255,255,255,.03);font-size:.9rem}
+  .ritem svg{width:1.1rem;height:1.1rem;flex:none}
+  .ritem.done{border-left-color:var(--green);background:rgba(48,209,88,.08);color:var(--green)}
+  .ritem.done svg{stroke:var(--green)}
+  .ritem.todo{border-left-color:var(--accent);color:var(--ink-2)}
+  .ritem.todo svg{stroke:var(--accent)}
+  .ritem b{color:var(--ink);font-weight:600}
+
+  /* ── FOOTER ── */
+  #foot .card{padding:2.6rem 2.4rem;text-align:center}
+  #foot h3{font-size:1.05rem;font-weight:700;margin-bottom:.7rem}
+  #foot p{font-size:.85rem;color:var(--ink-2);line-height:1.6;max-width:38rem;margin:.7rem auto 0}
+  #foot .refs{font-size:.76rem;color:var(--ink-3);margin-top:1.3rem}
+  #foot .refs b{color:var(--ink-2)}
+  #foot .close{margin-top:1.5rem;font-size:.88rem;font-weight:600;color:var(--ink)}
+  #foot .acc{color:var(--accent)}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<section id="hero" class="shot"><div class="wrap">
+  <div class="glow a"></div><div class="glow b"></div>
+  <div class="card">
+    <div class="mark">
+      <svg class="bolt" viewBox="0 0 24 24"><path d="M13 2L4 13h6l-1 9 9-11h-6l1-9z"/></svg>
+      <h1>Rift</h1>
+    </div>
+    <div class="tag">All your music. One beautiful, Mac-native player.</div>
+    <div class="sub"><b>Liquid Glass</b> &nbsp;·&nbsp; <b>Dynamic Island</b> &nbsp;·&nbsp; <b>Your data, your Mac</b></div>
+  </div>
+</div></section>
+
+<!-- IDEA -->
+<section id="idea" class="shot"><div class="wrap">
+  <div class="glow a"></div>
+  <div class="card">
+    <div class="kicker">The idea</div>
+    <h2>A native macOS music player</h2>
+    <p class="body"><strong>Rift is pure player.</strong> Liquid Glass design, a Dynamic Island in your notch, and your data stays on your Mac. No cloud, no telemetry — pure privacy.</p>
+    <p class="body">Connect your Google account to unlock YouTube Music's full library and recommendation engine. Everything flows into native SwiftUI: listen, download, build playlists, track your stats. The architecture goes further — each music service plugs in behind the same playback interface, so <strong>one library, one player, many platforms</strong> arrives without changing the UI.</p>
+  </div>
+</div></section>
+
+<!-- FEATURES -->
+<section id="features" class="shot"><div class="wrap">
+  <div class="glow a"></div><div class="glow b"></div><div class="glow c"></div>
+  <div class="row">
+    <div class="fcell">
+      <div class="bar"></div>
+      <span class="lbl">Notch</span>
+      <h3>Lives in your notch</h3>
+      <p>The MacBook notch becomes a Dynamic Island — album art and a dancing equalizer peek out while music plays; hover and it blooms into a full glass transport: shuffle, seek, repeat, like.</p>
+    </div>
+    <div class="fcell">
+      <div class="bar"></div>
+      <span class="lbl">Native</span>
+      <h3>Feels like macOS</h3>
+      <p>Liquid Glass surfaces, real vibrancy, native menus, media keys, Control Center, and a menu-bar mini player with live track title. Built like macOS because it's part of macOS.</p>
+    </div>
+    <div class="fcell">
+      <div class="bar"></div>
+      <span class="lbl">Private</span>
+      <h3>Keeps your data yours</h3>
+      <p>Listening history, stats, likes and playlists stored on your Mac. No telemetry, no analytics, no cloud middleman. Credentials live in Keychain, nowhere else.</p>
+    </div>
+  </div>
+</div></section>
+
+<!-- CAPABILITIES -->
+<section id="caps" class="shot"><div class="wrap">
+  <div class="glow b"></div>
+  <div class="card">
+    <table>
+      <tr><td class="k">Full catalog, native UI</td><td class="v">Search, albums, artists, playlists, moods, charts — all rendered in SwiftUI</td></tr>
+      <tr><td class="k">Real recommendations</td><td class="v">Home feed, radio &amp; autoplay, <em>"More like…"</em> and <em>"Because you liked…"</em> shelves seeded by what you actually play</td></tr>
+      <tr><td class="k">Likes &amp; playlists that sync</td><td class="v">Local-first and instant; signed in, they push back to your account</td></tr>
+      <tr><td class="k">Offline</td><td class="v">Download tracks and keep them; streamed audio caches for instant replay</td></tr>
+      <tr><td class="k">Lyrics + on-device AI</td><td class="v">Built-in lyrics; optional local AI (Apple Intelligence or Ollama) transliterates and translates them</td></tr>
+      <tr><td class="k">Your listening, charted</td><td class="v">Top songs, top artists, listening clocks by hour and weekday — computed locally</td></tr>
+      <tr><td class="k">A player that behaves</td><td class="v">Resume where you left off, near-gapless preloading, global shortcuts, anonymous mode without any account</td></tr>
+    </table>
+  </div>
+</div></section>
+
+<!-- GET RIFT -->
+<section id="get" class="shot"><div class="wrap">
+  <div class="glow a"></div><div class="glow b"></div>
+  <div class="card">
+    <div class="note">In active development</div>
+    <h2>Get Rift</h2>
+    <p class="lede">Expect rough edges while we head to 1.0.</p>
+    <div class="methods">
+      <div class="m"><h4>Download</h4><p>Grab the latest <strong>.dmg</strong> from Releases, drag to Applications, done.</p></div>
+      <div class="m"><h4>From source</h4><p>Clone, open the Xcode project, build. Xcode 26+ · macOS 26 Tahoe.</p></div>
+    </div>
+    <p class="foot">A notch Mac is needed for the Dynamic Island; everything else works on any Mac running Tahoe. Streaming uses <strong>yt-dlp</strong> under the hood — Homebrew if available, Python 3.10+ fallback, or a standalone binary otherwise.</p>
+  </div>
+</div></section>
+
+<!-- ARCH RULE -->
+<section id="rule" class="shot"><div class="wrap">
+  <div class="card"><div class="callout">
+    <p><strong style="color:var(--ink)">The core rule:</strong> Nothing above <strong style="color:var(--accent)">PlaybackSource</strong> knows where audio comes from. That seam turns "a YouTube Music client" into "a player for everything" — each new service is a new conformer, the same UI never changes.</p>
+  </div></div>
+</div></section>
+
+<!-- ROADMAP -->
+<section id="road" class="shot"><div class="wrap">
+  <div class="glow a"></div><div class="glow b"></div>
+  <div class="list">
+    <div class="ritem done"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Native browse: search, artists, albums, charts, moods</div>
+    <div class="ritem done"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Notch Dynamic Island + menu-bar player</div>
+    <div class="ritem done"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Likes, playlists, downloads, stats, lyrics + local AI</div>
+    <div class="ritem todo"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round"><path d="M5 12h14"/></svg>Gapless playback &amp; crossfade</div>
+    <div class="ritem todo"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round"><path d="M5 12h14"/></svg>Local file library (your own MP3 / FLAC)</div>
+    <div class="ritem todo"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round"><path d="M5 12h14"/></svg>Vinyl mode — spinning record, tonearm and all</div>
+    <div class="ritem todo"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round"><path d="M5 12h14"/></svg>Signed &amp; notarized releases, auto-update</div>
+    <div class="ritem todo"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round"><path d="M5 12h14"/></svg><b>More services behind the same player</b> — the unified library</div>
+  </div>
+</div></section>
+
+<!-- FOOTER -->
+<section id="foot" class="shot"><div class="wrap">
+  <div class="glow b"></div>
+  <div class="card">
+    <h3>License &amp; fine print</h3>
+    <p><strong>GPL-3.0</strong> — free as in freedom. Attributions in NOTICE.</p>
+    <p>Rift is an independent open-source project — <strong>not affiliated with, endorsed by, or connected to Google LLC, YouTube, or any music service it connects to.</strong> All trademarks belong to their owners. No ads, no resale, no bundled credentials; downloading content may conflict with a service's terms — use responsibly where permitted.</p>
+    <div class="refs">Protocol &amp; design references: <b>ytmusicapi</b> · <b>OuterTune</b> · <b>Atoll</b> · <b>pear-desktop</b></div>
+    <div class="close">Built for people who miss <span class="acc">real Mac apps.</span></div>
+  </div>
+</div></section>
+
+<script>
+  // isolate the hashed block; no hash → show all stacked
+  function iso(){
+    const id=location.hash.slice(1);
+    document.querySelectorAll('.shot').forEach(s=>{
+      s.classList.toggle('solo', !id || s.id===id);
+    });
+  }
+  addEventListener('hashchange',iso); iso();
+</script>
+</body>
+</html>

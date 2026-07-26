@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rift — Architecture</title>
+<style>
+  :root{
+    --bg:#000; --ink:#f5f5f7; --ink-2:rgba(245,245,247,.64); --ink-3:rgba(245,245,247,.38);
+    --hairline:rgba(255,255,255,.10);
+    --accent:#ff375f;      /* control flow */
+    --blue:#0a84ff;        /* data / audio */
+    --indigo:#5856d6;      /* network */
+    --font:-apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue",sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{background:var(--bg)}
+  body{
+    font-family:var(--font); background:transparent; color:var(--ink);
+    -webkit-font-smoothing:antialiased; line-height:1.5; overflow-x:hidden;
+    min-height:100vh; display:flex; flex-direction:column; align-items:center;
+    padding:56px 20px 80px;
+  }
+
+  /* aurora glows — the color every glass surface diffuses */
+  .glow-wrap{position:fixed;pointer-events:none;z-index:0}
+  .glow{border-radius:50%;filter:blur(90px)}
+  .g-a{width:600px;height:600px;top:-8vh;left:-160px;
+    background:radial-gradient(circle,rgba(255,55,95,.30),transparent 68%);
+    animation:drift-a 21s ease-in-out infinite alternate}
+  .g-b{width:660px;height:660px;top:38vh;right:-220px;
+    background:radial-gradient(circle,rgba(88,86,214,.34),transparent 68%);
+    animation:drift-b 26s ease-in-out infinite alternate}
+  .g-c{width:520px;height:520px;bottom:-16vh;left:28vw;
+    background:radial-gradient(circle,rgba(10,132,255,.26),transparent 68%);
+    animation:drift-c 24s ease-in-out infinite alternate}
+  @keyframes drift-a{to{transform:translate(140px,90px) scale(1.18)}}
+  @keyframes drift-b{to{transform:translate(-160px,-70px) scale(1.12)}}
+  @keyframes drift-c{to{transform:translate(120px,-110px) scale(1.22)}}
+
+  .head{position:relative;z-index:1;text-align:center;margin-bottom:34px;max-width:720px}
+  .kicker{font-size:.78rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:12px}
+  .head h1{font-size:clamp(2rem,4.6vw,3.1rem);font-weight:700;letter-spacing:-.026em;line-height:1.05}
+  .head p{margin-top:14px;color:var(--ink-2);font-size:clamp(.95rem,1.4vw,1.1rem)}
+
+  .card{
+    position:relative;z-index:1;width:100%;max-width:1120px;
+    border-radius:28px;padding:22px;
+    background:radial-gradient(120% 140% at 50% 0%,rgba(255,55,95,.06),transparent 55%),rgba(255,255,255,.045);
+    border:1px solid var(--hairline);
+    backdrop-filter:blur(28px) saturate(160%);-webkit-backdrop-filter:blur(28px) saturate(160%);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 40px 120px rgba(0,0,0,.6);
+  }
+  svg{width:100%;height:auto;display:block;overflow:visible}
+
+  /* band backdrops + labels */
+  .band{fill:rgba(255,255,255,.018);stroke:var(--hairline);stroke-dasharray:2 6}
+  .band-label{fill:var(--ink-3);font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase}
+
+  /* nodes */
+  .node{cursor:default;transition:transform .28s cubic-bezier(.34,.9,.32,1.06)}
+  .node .glass{fill:rgba(255,255,255,.05);stroke:var(--hairline);stroke-width:1;transition:fill .28s ease,stroke .28s ease}
+  .node .hl{fill:rgba(255,255,255,.08)}         /* top highlight sliver */
+  .node .title{fill:var(--ink);font-size:14px;font-weight:650;letter-spacing:-.01em}
+  .node .sub{fill:var(--ink-2);font-size:10.5px;font-weight:500;letter-spacing:.01em}
+  .node .ic{stroke:var(--ink);stroke-width:1.7;fill:none;stroke-linecap:round;stroke-linejoin:round}
+  .node:hover{transform:translateY(-3px)}
+  .node:hover .glass{fill:rgba(255,255,255,.09);stroke:rgba(255,255,255,.22)}
+
+  .node.seam .glass{fill:rgba(255,55,95,.12);stroke:rgba(255,55,95,.55)}
+  .node.seam:hover .glass{fill:rgba(255,55,95,.18);stroke:rgba(255,55,95,.8)}
+  .node.seam .ic{stroke:var(--accent)}
+  .node.seam .title{fill:#ffd7df}
+
+  .node.ext .glass{fill:rgba(88,86,214,.10);stroke:rgba(88,86,214,.42)}
+  .node.ext:hover .glass{fill:rgba(88,86,214,.16);stroke:rgba(88,86,214,.7)}
+  .node.ext .ic{stroke:#c9c8ff}
+  .node.ext .title{fill:#e5e4ff}
+
+  /* wires */
+  .wire{fill:none;stroke-width:1.4;stroke-linecap:round;
+    stroke-dasharray:5 7;animation:flow 1.1s linear infinite}
+  @keyframes flow{to{stroke-dashoffset:-24}}
+  .wire.ctrl{stroke:rgba(255,55,95,.34)}
+  .wire.data{stroke:rgba(10,132,255,.36)}
+  .wire.net{stroke:rgba(88,86,214,.36)}
+  .p-ctrl{fill:var(--accent);filter:url(#soft)}
+  .p-data{fill:var(--blue);filter:url(#soft)}
+  .p-net{fill:var(--indigo);filter:url(#soft)}
+
+  .legend{position:relative;z-index:1;display:flex;gap:26px;flex-wrap:wrap;justify-content:center;
+    margin-top:26px;font-size:.82rem;color:var(--ink-2)}
+  .legend .li{display:flex;align-items:center;gap:9px}
+  .legend .dot{width:22px;height:3px;border-radius:2px}
+  .note{position:relative;z-index:1;margin-top:20px;max-width:620px;text-align:center;
+    font-size:.85rem;color:var(--ink-3);line-height:1.6}
+  .note b{color:var(--accent);font-weight:650}
+
+  @media (prefers-reduced-motion:reduce){
+    .glow,.wire{animation:none}
+  }
+</style>
+</head>
+<body>
+  <div class="glow-wrap"><div class="glow g-a"></div></div>
+  <div class="glow-wrap"><div class="glow g-b"></div></div>
+  <div class="glow-wrap"><div class="glow g-c"></div></div>
+
+  <div class="head">
+    <div class="kicker">Under the Hood</div>
+    <h1>Rift Architecture</h1>
+    <p>One native player. Every source plugged in behind a single seam — the UI never learns where audio comes from.</p>
+  </div>
+
+  <div class="card">
+    <svg id="diagram" viewBox="0 0 1160 980" preserveAspectRatio="xMidYMid meet" role="img"
+         aria-label="Rift layered architecture: interface, coordinator, PlaybackSource seam, sources, data services, external network.">
+      <defs>
+        <filter id="soft" x="-120%" y="-120%" width="340%" height="340%">
+          <feGaussianBlur stdDeviation="2.4" result="b"/>
+          <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+
+        <!-- Lucide-style stroke icons (24x24) -->
+        <symbol id="ic-window" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="M3 9h18"/><path d="M6.5 6.5h.01M9 6.5h.01"/></symbol>
+        <symbol id="ic-menubar" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="M3 8h18"/><path d="M15 6h3"/></symbol>
+        <symbol id="ic-notch" viewBox="0 0 24 24"><rect x="2.5" y="4.5" width="19" height="15" rx="3"/><path d="M9 4.5h6a2 2 0 0 1-2 2h-2a2 2 0 0 1-2-2z"/></symbol>
+        <symbol id="ic-play" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.2"/><path d="M10 8.5l6 3.5-6 3.5z"/></symbol>
+        <symbol id="ic-layers" viewBox="0 0 24 24"><path d="M12 3l9 5-9 5-9-5 9-5z"/><path d="M3 13l9 5 9-5"/></symbol>
+        <symbol id="ic-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.6 2.4 4 5.6 4 9s-1.4 6.6-4 9c-2.6-2.4-4-5.6-4-9s1.4-6.6 4-9z"/></symbol>
+        <symbol id="ic-drive" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="10" rx="2.5"/><path d="M3 12h18"/><circle cx="7" cy="14.5" r="1"/></symbol>
+        <symbol id="ic-download" viewBox="0 0 24 24"><path d="M12 3v11"/><path d="M8 10l4 4 4-4"/><path d="M4 18h16"/></symbol>
+        <symbol id="ic-search" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M20 20l-4.8-4.8"/></symbol>
+        <symbol id="ic-db" viewBox="0 0 24 24"><ellipse cx="12" cy="6" rx="7.5" ry="3"/><path d="M4.5 6v12c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3V6"/><path d="M4.5 12c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3"/></symbol>
+        <symbol id="ic-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2.5"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/><circle cx="12" cy="15.5" r="1.2"/></symbol>
+        <symbol id="ic-yt" viewBox="0 0 24 24"><rect x="2.5" y="5" width="19" height="14" rx="4"/><path d="M10 9l5 3-5 3z"/></symbol>
+        <symbol id="ic-key" viewBox="0 0 24 24"><circle cx="8" cy="12" r="4"/><path d="M11.5 11h9"/><path d="M17.5 11v3.5"/><path d="M20.5 11v2.5"/></symbol>
+      </defs>
+
+      <g id="bands"></g>
+      <g id="wires"></g>
+      <g id="nodes"></g>
+    </svg>
+  </div>
+
+  <div class="legend">
+    <div class="li"><span class="dot" style="background:var(--accent)"></span>Control flow — play / pause / seek / next</div>
+    <div class="li"><span class="dot" style="background:var(--blue)"></span>Data &amp; audio — metadata, library, playback state</div>
+    <div class="li"><span class="dot" style="background:var(--indigo)"></span>Network — InnerTube API &amp; OAuth</div>
+  </div>
+  <p class="note"><b>The seam:</b> nothing above <b>PlaybackSource</b> knows whether audio comes from a WebView, a local file, or a future native extractor. Swap the conformer, keep the UI.</p>
+
+<script>
+/* ── layout ───────────────────────────────────────────── */
+const W = 1160;
+const COLS = { L: 200, M: 580, R: 960 };   // three column centres
+const bands = [
+  { y: 40,  h: 118, label: "Interface" },
+  { y: 196, h: 92,  label: "Coordinator" },
+  { y: 326, h: 92,  label: "Playback seam" },
+  { y: 456, h: 118, label: "Sources" },
+  { y: 612, h: 118, label: "Data & services" },
+  { y: 768, h: 100, label: "External · network" },
+];
+
+/* node: cx = centre x, y = top, w, h, icon, title, sub[], cls */
+const nodes = [
+  // Interface
+  { id:"win",  cx:COLS.L, y:62,  w:236, h:76, icon:"ic-window",  title:"Main Window",  sub:["Sidebar · queue · library"], cls:"" },
+  { id:"menu", cx:COLS.M, y:62,  w:236, h:76, icon:"ic-menubar", title:"Menu Bar",     sub:["Compact transport"], cls:"" },
+  { id:"notch",cx:COLS.R, y:62,  w:236, h:76, icon:"ic-notch",   title:"Notch Island", sub:["Dynamic-island player"], cls:"" },
+  // Coordinator
+  { id:"pc",   cx:COLS.M, y:214, w:520, h:64, icon:"ic-play",    title:"PlayerController", sub:["Transport · queue · now-playing state"], cls:"" },
+  // Seam
+  { id:"seam", cx:COLS.M, y:344, w:560, h:64, icon:"ic-layers",  title:"PlaybackSource  ·  protocol", sub:["The sacred seam — source-agnostic"], cls:"seam" },
+  // Sources
+  { id:"web",  cx:COLS.L, y:478, w:236, h:84, icon:"ic-globe",    title:"WebView Player", sub:["Hidden WKWebView","YTM player JS · Google's cipher"], cls:"" },
+  { id:"local",cx:COLS.M, y:478, w:236, h:84, icon:"ic-drive",    title:"Local Player",   sub:["AVAudioEngine / AVPlayer","User's own files"], cls:"" },
+  { id:"dl",   cx:COLS.R, y:478, w:236, h:84, icon:"ic-download", title:"Downloads",      sub:["yt-dlp · out-of-process","Offline capture"], cls:"" },
+  // Data & services
+  { id:"tube", cx:COLS.L, y:634, w:236, h:76, icon:"ic-search", title:"InnerTube Client", sub:["Search · browse · recs · auth"], cls:"" },
+  { id:"lib",  cx:COLS.M, y:634, w:236, h:76, icon:"ic-db",     title:"Library",          sub:["SQLite / GRDB · cache · stats"], cls:"" },
+  { id:"key",  cx:COLS.R, y:634, w:236, h:76, icon:"ic-lock",   title:"Keychain",         sub:["Tokens & cookies · encrypted"], cls:"" },
+  // External
+  { id:"ytm",  cx:390, y:786, w:262, h:64, icon:"ic-yt",  title:"YouTube Music", sub:["InnerTube API · catalog"], cls:"ext" },
+  { id:"oauth",cx:800, y:786, w:238, h:64, icon:"ic-key", title:"Google OAuth",  sub:["TV-device flow"], cls:"ext" },
+];
+const N = Object.fromEntries(nodes.map(n=>[n.id,n]));
+const nBot   = n => ({x:n.cx, y:n.y+n.h});
+const nTop   = n => ({x:n.cx, y:n.y});
+const nLeft  = n => ({x:n.cx-n.w/2, y:n.y+n.h/2});
+const nRight = n => ({x:n.cx+n.w/2, y:n.y+n.h/2});
+
+/* wire: from -> to points, type (ctrl|data|net), curve strength, particles */
+const wires = [
+  // control flow (down) — UI drives the coordinator, coordinator drives the seam, seam drives sources
+  { a:nBot(N.win),  b:{x:N.pc.cx-150,y:N.pc.y}, t:"ctrl" },
+  { a:nBot(N.menu), b:{x:N.pc.cx,    y:N.pc.y}, t:"ctrl" },
+  { a:nBot(N.notch),b:{x:N.pc.cx+150,y:N.pc.y}, t:"ctrl" },
+  { a:nBot(N.pc),   b:nTop(N.seam), t:"ctrl" },
+  { a:{x:N.seam.cx-150,y:N.seam.y+N.seam.h}, b:nTop(N.web),   t:"ctrl" },
+  { a:{x:N.seam.cx,    y:N.seam.y+N.seam.h}, b:nTop(N.local), t:"ctrl" },
+  { a:{x:N.seam.cx+150,y:N.seam.y+N.seam.h}, b:nTop(N.dl),    t:"ctrl" },
+  // data & audio (up) — metadata feeds the UI, library feeds local playback, downloads land in library
+  { a:nLeft(N.tube),  b:nLeft(N.win),  t:"data", rail:"left" },   // metadata rail up the left
+  { a:nTop(N.lib),    b:nBot(N.local), t:"data" },
+  { a:nLeft(N.dl),    b:nRight(N.lib), t:"data" },
+  // network (out) — clients talk to YouTube, OAuth fills the keychain, keychain arms the client
+  { a:nBot(N.web),  b:nTop(N.ytm),  t:"net" },
+  { a:nBot(N.tube), b:{x:N.ytm.cx-40,y:N.ytm.y}, t:"net" },
+  { a:nTop(N.oauth),   b:nBot(N.key), t:"net" },
+  { a:nLeft(N.key),    b:nRight(N.tube), t:"net", rail:"h" },
+];
+
+/* ── render ───────────────────────────────────────────── */
+const SVGNS = "http://www.w3.org/2000/svg";
+const el = (tag, attrs={}) => { const e=document.createElementNS(SVGNS,tag); for(const k in attrs) e.setAttribute(k,attrs[k]); return e; };
+
+// bands
+const gB = document.getElementById("bands");
+for (const b of bands){
+  gB.appendChild(el("rect",{x:24,y:b.y,width:W-48,height:b.h,rx:16,class:"band"}));
+  const t = el("text",{x:40,y:b.y+16,class:"band-label"}); t.textContent=b.label; gB.appendChild(t);
+}
+
+// wire path builder — smooth cubic; vertical default, horizontal/left rails get side handles
+function wirePath(w){
+  const {a,b} = w;
+  if (w.rail==="left"){
+    const bulge = Math.min(a.x,b.x) - 120;
+    return `M${a.x},${a.y} C${bulge},${a.y-40} ${bulge},${b.y+40} ${b.x},${b.y}`;
+  }
+  if (w.rail==="h"){
+    const midx = (a.x+b.x)/2;
+    return `M${a.x},${a.y} C${midx},${a.y} ${midx},${b.y} ${b.x},${b.y}`;
+  }
+  const dy = (b.y-a.y);
+  return `M${a.x},${a.y} C${a.x},${a.y+dy*0.5} ${b.x},${b.y-dy*0.5} ${b.x},${b.y}`;
+}
+
+const gW = document.getElementById("wires");
+wires.forEach((w,i)=>{
+  const d = wirePath(w);
+  const id = "w"+i;
+  gW.appendChild(el("path",{id,d,class:"wire "+w.t}));
+  // 2 particles per wire, staggered
+  for (let k=0;k<2;k++){
+    const c = el("circle",{r:3, class:"p-"+w.t});
+    const m = el("animateMotion",{dur:"2.8s", repeatCount:"indefinite", begin:(k*1.4)+"s", rotate:"auto"});
+    m.appendChild(el("mpath",{href:"#"+id}));
+    // xlink fallback for older renderers
+    m.lastChild.setAttributeNS("http://www.w3.org/1999/xlink","href","#"+id);
+    c.appendChild(m); gW.appendChild(c);
+  }
+});
+
+// nodes
+const gN = document.getElementById("nodes");
+for (const n of nodes){
+  const x = n.cx - n.w/2;
+  const g = el("g",{class:"node "+n.cls});
+  g.appendChild(el("rect",{x,y:n.y,width:n.w,height:n.h,rx:16,class:"glass"}));
+  g.appendChild(el("rect",{x:x+1,y:n.y+1,width:n.w-2,height:2,rx:1,class:"hl"}));
+  // icon box
+  const iconSize = 22, iy = n.y + n.h/2 - iconSize/2, ix = x+18;
+  const use = el("use",{href:"#"+n.icon,x:ix,y:iy,width:iconSize,height:iconSize,class:"ic"});
+  use.setAttributeNS("http://www.w3.org/1999/xlink","href","#"+n.icon);
+  g.appendChild(use);
+  // text
+  const tx = ix + iconSize + 14;
+  const lines = n.sub.length;
+  const titleY = lines>1 ? n.y+n.h/2-6 : n.y+n.h/2-3;
+  const title = el("text",{x:tx,y:titleY,class:"title"}); title.textContent=n.title; g.appendChild(title);
+  n.sub.forEach((s,si)=>{
+    const sy = titleY + 15 + si*13;
+    const sub = el("text",{x:tx,y:sy,class:"sub"}); sub.textContent=s; g.appendChild(sub);
+  });
+  gN.appendChild(g);
+}
+</script>
+</body>
+</html>

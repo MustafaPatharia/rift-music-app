@@ -1,0 +1,31 @@
+# macOS
+.DS_Store
+
+# Xcode — user + build state
+build/
+DerivedData/
+*.xcuserstate
+*.xcuserdatad/
+xcuserdata/
+*.xcscmblueprint
+*.xccheckout
+*.moved-aside
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# Swift Package Manager
+.swiftpm/
+.build/
+Packages/
+
+# Claude Code local files
+.claude/
+
+# Local project docs — never committed
+CLAUDE.md
+PLAN.md
+
+scripts
+assets

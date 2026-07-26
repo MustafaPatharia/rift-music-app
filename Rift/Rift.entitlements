@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- ponytail: sandbox OFF for the dev spike so Process can spawn yt-dlp from
+	     /opt/homebrew. Re-enable app-sandbox + bundle yt-dlp inside the app (or run
+	     it via a sandbox-friendly XPC helper) before shipping. -->
+	<key>com.apple.security.app-sandbox</key>
+	<false/>
+</dict>
+</plist>

@@ -1,0 +1,54 @@
+Rift
+Copyright (C) 2026 Rift contributors
+
+This program is free software: you can redistribute it and/or modify it under
+the terms of the GNU General Public License version 3, as published by the Free
+Software Foundation. See the LICENSE file for the full text.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+Contact: [YOUR-CONTACT-EMAIL]   (placeholder — set before release)
+
+-------------------------------------------------------------------------------
+Affiliation disclaimer
+-------------------------------------------------------------------------------
+Rift is not affiliated with, endorsed by, or connected to Google LLC or
+YouTube. "YouTube" and "YouTube Music" are trademarks of Google LLC.
+
+-------------------------------------------------------------------------------
+Third-party code
+-------------------------------------------------------------------------------
+
+Atoll (DynamicIsland) — https://github.com/Ebullioscopic/Atoll
+    License: GPL-3.0
+    The notch window layer is adapted from Atoll:
+      MyMusicApp/Notch/CGSSpace.swift
+      MyMusicApp/Notch/NotchShape.swift
+      MyMusicApp/Notch/NotchWindow.swift        (from Atoll DynamicIslandWindow)
+      MyMusicApp/Notch/NotchSpaceManager.swift
+    The expand/collapse-on-hover interaction (NotchView, NotchController) is
+    reimplemented against our own PlayerController, following Atoll's approach.
+
+boring.notch — https://github.com/TheBoredTeam/boring.notch
+    License: GPL-3.0
+    Atoll's notch window / Spaces code (above) originates from boring.notch;
+    the upstream attribution is preserved in the adapted files.
+
+Protocol references (no code copied — Swift reimplementations of public /
+reverse-engineered protocol shapes, which are not themselves copyrightable):
+
+    ytmusicapi — https://github.com/sigma67/ytmusicapi   (MIT)
+        Reference for the InnerTube search/browse request shapes and the
+        WEB_REMIX client context used by MyMusicApp/Core/InnerTube.
+
+    OuterTune — https://github.com/OuterTune/OuterTune    (GPL-3.0)
+        Reference for InnerTube feature set and playlist/library semantics.
+
+    pear-desktop — https://github.com/pear-devs/pear-desktop   (MIT)
+        Reference for the affiliation disclaimer wording and WebView-wrapper
+        playback patterns.
+
+Downloads (planned): yt-dlp — https://github.com/yt-dlp/yt-dlp  (Unlicense)
+    Invoked out-of-process to resolve stream URLs / download audio.
