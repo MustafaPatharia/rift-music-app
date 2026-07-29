@@ -11,7 +11,6 @@ struct ContentView: View {
     @EnvironmentObject var player: PlayerController
     @EnvironmentObject var auth: AuthController
     @EnvironmentObject var ui: UIState
-    @EnvironmentObject var setup: SetupController
     @ObservedObject private var playlistStore = PlaylistStore.shared
     @State private var panel: Panel = .home
     @State private var newPlaylistName = ""
@@ -124,7 +123,6 @@ struct ContentView: View {
                 Text("“\(t.title)” will be its first song.")
             }
         }
-        .sheet(isPresented: $setup.showPrompt) { SetupPromptView() }
         .sheet(isPresented: $auth.showingLogin) {
             NavigationStack {
                 GoogleSignInView { auth.completed($0) }

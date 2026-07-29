@@ -15,12 +15,12 @@ final class AppServices {
     let mode = AppModeController()
     let auth = AuthController()
     let ui = UIState()
-    let setup = SetupController()
     lazy var playerPanel = PlayerPanelController(player: player, ui: ui)
 
     private init() {
-        // Check/install a fast yt-dlp at launch (system → brew install → prompt to
-        // bootstrap Homebrew), so it's ready before the first play.
-        setup.start()
+        // Unpack the bundled playback engine (python + yt-dlp, both inside the
+        // app) so it's ready before the first play. No network, no prompt —
+        // after the first launch this is a no-op.
+        Task { await YtDlpManager.shared.prepare() }
     }
 }

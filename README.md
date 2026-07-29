@@ -4,12 +4,16 @@
 
 <br><br>
 
-![Platform](https://img.shields.io/badge/macOS-26_Tahoe+-black?logo=apple&logoColor=white)
-![Swift](https://img.shields.io/badge/Swift_6-SwiftUI-F05138?logo=swift&logoColor=white)
-![License](https://img.shields.io/badge/License-GPL--3.0-blue)
-![Status](https://img.shields.io/badge/Status-In_Development-orange)
+<!-- brand-crimson badges -->
+![macOS](https://img.shields.io/badge/macOS-26_Tahoe+-ff2f3a?style=flat-square&logo=apple&logoColor=white)
+![Swift](https://img.shields.io/badge/Swift_6-SwiftUI-ff6b4a?style=flat-square&logo=swift&logoColor=white)
+![YouTube Music](https://img.shields.io/badge/YouTube_Music-client-ffb347?style=flat-square&logo=youtubemusic&logoColor=white)
+![License](https://img.shields.io/badge/License-GPL--3.0-3a3a3a?style=flat-square)
+![Status](https://img.shields.io/badge/status-in_development-ff2f3a?style=flat-square)
 
-**[Download](../../releases/latest)** · **[Roadmap](#roadmap)** · **[License](LICENSE)**
+### A native Mac **YouTube Music** client — Liquid Glass, a Dynamic Island, private by default.
+
+**[⬇ Download](../../releases/latest)** · **[📓 Changelog](CHANGELOG.md)** · **[🌐 Website](website/)** · **[🗺 Roadmap](#-roadmap)** · **[⚖ License](LICENSE)**
 
 </div>
 
@@ -17,65 +21,93 @@
 
 ## The idea
 
-**Rift is pure player.** Liquid Glass design, a Dynamic Island in your notch, and your data stays on your Mac — no cloud, no telemetry.
+**Rift is a pure player.** Sign in with your Google account and your whole YouTube
+Music world — playlists, likes, recommendations, two-way sync — flows into a native
+SwiftUI app with Liquid Glass, a Dynamic Island in your notch, and stats that never
+leave your Mac. No cloud, no telemetry, no account required for anonymous mode.
 
-Connect your Google account to unlock YouTube Music's full library and recommendation engine. Everything flows into native SwiftUI: listen, download, build playlists, track your stats. The architecture goes further — each music service plugs in behind the same playback interface, so **one library, one player, many platforms** arrives without changing the UI.
+One library. One queue. One beautiful player. And **more interesting things to come.**
 
 ---
 
-## What Rift does
+## 📸 See it
 
-<img src="assets/readme/features.png" alt="Lives in your notch · Feels like macOS · Keeps your data yours" width="100%">
+<table>
+  <tr>
+    <td width="50%" align="center"><b>Home</b><br><sub>Featured playlists · recently played · top artists</sub><br><br><img src="website/public/img/shots/home_screen.png" alt="Rift Home" width="100%"></td>
+    <td width="50%" align="center"><b>Now Playing</b><br><sub>Full-window art · live scrubber · transport</sub><br><br><img src="website/public/img/shots/full_screen_player_screen.png" alt="Rift Now Playing" width="100%"></td>
+  </tr>
+  <tr>
+    <td width="50%" align="center"><b>Lyrics</b><br><sub>Synced · on-device transliteration & translation</sub><br><br><img src="website/public/img/shots/player_with_lyrics_screen.png" alt="Rift Lyrics" width="100%"></td>
+    <td width="50%" align="center"><b>Artist</b><br><sub>Bio · monthly listeners · top songs · radio</sub><br><br><img src="website/public/img/shots/artist_screen.png" alt="Rift Artist page" width="100%"></td>
+  </tr>
+  <tr>
+    <td width="50%" align="center"><b>Search</b><br><sub>Trending charts · recents · top artists</sub><br><br><img src="website/public/img/shots/search_screen.png" alt="Rift Search" width="100%"></td>
+    <td width="50%" align="center"><b>Library</b><br><sub>Your playlists · likes · downloads</sub><br><br><img src="website/public/img/shots/library_screen.png" alt="Rift Library" width="100%"></td>
+  </tr>
+</table>
+
+<div align="center"><sub>The Dynamic Island, expanded — album art, scrubber and transport in the notch.</sub><br><br><img src="website/public/img/shots/top_notch.png" alt="Rift Dynamic Island expanded" width="420"></div>
+
+---
+
+## ✨ What Rift does
 
 | | |
 |---|---|
-| **Full catalog, native UI** | Search, albums, artists, playlists, moods, charts — all rendered in SwiftUI |
-| **Real recommendations** | Home feed, radio & autoplay, *"More like…"* and *"Because you liked…"* shelves seeded by what you actually play |
-| **Likes & playlists that sync** | Local-first and instant; signed in, they push back to your account |
-| **Offline** | Download tracks and keep them; streamed audio caches for instant replay |
-| **Lyrics + on-device AI** | Built-in lyrics; optional local AI (Apple Intelligence or Ollama) transliterates and translates them |
-| **Your listening, charted** | Top songs, top artists, listening clocks by hour and weekday — computed locally |
-| **A player that behaves** | Resume where you left off, near-gapless preloading, global shortcuts, anonymous mode without any account |
+| 🎧 **Full catalog, native UI** | Search, albums, artists, playlists, moods and charts — all SwiftUI. |
+| 🌟 **Real recommendations** | Home feed, radio & autoplay, *"More like…"* and *"Because you liked…"* seeded by what you actually play. |
+| 🏝 **A living notch** | A Dynamic Island for album art + equalizer; hover to a full transport. |
+| ⬇ **Offline, properly** | Download tracks and keep them; streams cache for instant replay. |
+| 🎤 **Lyrics + on-device AI** | Synced lyrics; optional local AI (Apple Intelligence / Ollama) transliterates & translates. |
+| 📊 **Your listening, charted** | Top songs, top artists, listening clocks — computed and stored **locally only**. |
+| 🔒 **Private by default** | No telemetry, no analytics, no cloud middleman. Credentials live in the Keychain. |
 
 ---
 
-## Get Rift
+## 🚀 Get Rift
 
 > **In active development** — expect rough edges while we head to 1.0.
 
-**Download** — grab the latest `.dmg` from [Releases](../../releases/latest), drag to Applications, done.
+**Download** — grab the latest from **[Releases](../../releases/latest)**, drag to
+Applications, done. *Requires macOS 26 Tahoe. Streaming uses `yt-dlp` under the hood.*
 
 **From source:**
 
 ```bash
-git clone <url>
-open Rift.xcodeproj   # Xcode 26+ · macOS 26 Tahoe
+git clone https://github.com/MustafaPatharia/rift-music-app
+open rift-music-app/Rift.xcodeproj   # Xcode 26+ · macOS 26 Tahoe
 ```
 
-A notch Mac is needed for the Dynamic Island; everything else works on any Mac running Tahoe. Streaming uses `yt-dlp` under the hood — Homebrew if available, Python 3.10+ fallback, or a standalone binary otherwise.
+**The website** (marketing / this repo's `website/`) is a static Next.js app:
+
+```bash
+cd website && npm install && npm run dev
+```
 
 ---
 
-## Under the hood
+## 🧱 Under the hood
 
-<img src="assets/readme/architecture.png" alt="Rift architecture — interface, coordinator, PlaybackSource seam, sources, data & services, external network" width="100%">
+<img src="assets/readme/architecture.png" alt="Rift architecture — interface, coordinator, PlaybackSource seam, sources, data & services" width="100%">
 
-> **The core rule:** nothing above `PlaybackSource` knows where audio comes from. That seam turns "a YouTube Music client" into "a player for everything" — each new service is a new conformer, and the same UI never changes.
+> **The core rule:** nothing above `PlaybackSource` knows where audio comes from.
+> That seam is what keeps Rift clean and lets it keep getting better.
 
-*[View the interactive diagram →](Docs/architecture.html)* (open in a browser)
+*[Interactive diagram →](Docs/architecture.html)* (open in a browser)
 
 ---
 
-## Roadmap
+## 🗺 Roadmap
 
-- [x] Native browse: search, artists, albums, charts, moods
+- [x] Native browse — search, artists, albums, charts, moods
 - [x] Notch Dynamic Island + menu-bar player
 - [x] Likes, playlists, downloads, stats, lyrics + local AI
-- [ ] Gapless playback & crossfade
-- [ ] Local file library (your own MP3 / FLAC)
-- [ ] Vinyl mode — spinning record, tonearm and all
+- [x] YouTube Music sign-in, recommendations, two-way sync
 - [ ] Signed & notarized releases, auto-update
-- [ ] **More services behind the same player** — the unified library
+- [ ] More interesting things to come
+
+See **[CHANGELOG.md](CHANGELOG.md)** for release history.
 
 ---
 
@@ -87,6 +119,13 @@ A notch Mac is needed for the Dynamic Island; everything else works on any Mac r
 
 **[GPL-3.0](LICENSE)** — free as in freedom. Attributions in [NOTICE](NOTICE).
 
-Rift is an independent open-source project — **not affiliated with, endorsed by, or connected to Google LLC, YouTube, or any music service it connects to.** All trademarks belong to their owners. No ads, no resale, no bundled credentials; downloading content may conflict with a service's terms — use responsibly where permitted.
+Rift is an independent open-source project — **not affiliated with, endorsed by, or
+connected to Google LLC, YouTube, or any music service it connects to.** All
+trademarks belong to their owners. No ads, no resale, no bundled credentials;
+downloading content may conflict with a service's terms — use responsibly where
+permitted.
 
-Protocol & design references: [ytmusicapi](https://github.com/sigma67/ytmusicapi) · [OuterTune](https://github.com/OuterTune/OuterTune) · [Atoll](https://github.com/Ebullioscopic/Atoll) · [pear-desktop](https://github.com/pear-devs/pear-desktop)
+Protocol & design references: [ytmusicapi](https://github.com/sigma67/ytmusicapi) ·
+[OuterTune](https://github.com/OuterTune/OuterTune) ·
+[Atoll](https://github.com/Ebullioscopic/Atoll) ·
+[pear-desktop](https://github.com/pear-devs/pear-desktop)

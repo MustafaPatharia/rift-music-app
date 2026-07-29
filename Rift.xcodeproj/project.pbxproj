@@ -52,6 +52,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = A0000000000000000000007 /* Build configuration list for PBXNativeTarget "Rift" */;
 			buildPhases = (
+				A0000000000000000000010 /* Build playback engine */,
 				A0000000000000000000008 /* Sources */,
 				A0000000000000000000003 /* Frameworks */,
 				A0000000000000000000009 /* Resources */,
@@ -112,6 +113,27 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		A0000000000000000000010 /* Build playback engine */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 0;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"$(SRCROOT)/Scripts/fetch-engine.sh",
+			);
+			name = "Build playback engine";
+			outputPaths = (
+				"$(SRCROOT)/Rift/Resources/python-arm64.tar.gz",
+				"$(SRCROOT)/Rift/Resources/yt-dlp.zip",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/bash;
+			shellScript = "set -e\n# The bundled python + yt-dlp are gitignored (15 MB of binaries).\n# Build them if missing so a fresh clone still produces a working app.\n\"$SRCROOT/Scripts/fetch-engine.sh\"\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		A0000000000000000000008 /* Sources */ = {

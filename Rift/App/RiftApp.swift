@@ -19,13 +19,15 @@ struct RiftApp: App {
                 .environmentObject(AppServices.shared.player)
                 .environmentObject(AppServices.shared.auth)
                 .environmentObject(AppServices.shared.ui)
-                .environmentObject(AppServices.shared.setup)
                 .environmentObject(AppServices.shared.mode)
                 .frame(minWidth: 1250, maxWidth: .infinity,
                        minHeight: 850, maxHeight: .infinity)
         }
         .windowStyle(.hiddenTitleBar)
-        .defaultSize(width: 1500, height: 1000)
+        // Open at the content minimum, not larger — a first launch shouldn't
+        // take over the screen. macOS remembers the frame after that, so this
+        // only applies until the user resizes it once.
+        .defaultSize(width: 1250, height: 850)
         .defaultPosition(.center)
         .windowResizability(.contentMinSize)
         .commands {

@@ -31,9 +31,10 @@ final class PlayerPanelController {
     private let pillHeight: CGFloat = 124
     private let popupHeadroom: CGFloat = 172   // transparent space ABOVE the pill for the
                                                // volume popup (click-through when empty)
-    private let sidebarWidth: CGFloat = 236   // must match ContentView's sidebar
-    private let queueWidth: CGFloat = 300      // must match ContentView's QueueRail
+    private let sidebarWidth: CGFloat = 189   // must match ContentView's sidebar
+    private let queueWidth: CGFloat = 264      // must match ContentView's QueueRail
     private let overhang: CGFloat = 34        // points of the pill hanging outside
+    private let screenMargin: CGFloat = 12    // keep this much of the screen below the pill
 
     private var panelHeight: CGFloat { pillHeight + popupHeadroom }
 
@@ -54,10 +55,17 @@ final class PlayerPanelController {
             .store(in: &bag)
 
         // Child windows follow moves automatically but NOT resizes — recenter.
-        let o = NotificationCenter.default.addObserver(
-            forName: NSWindow.didResizeNotification, object: window, queue: .main
-        ) { [weak self] _ in MainActor.assumeIsolated { self?.reposition() } }
-        observers.append(o)
+        // Full-screen transitions land the final frame AFTER their animation, so
+        // the resize notification alone leaves the pill a step behind; catch both
+        // ends of the transition too.
+        for name in [NSWindow.didResizeNotification,
+                     NSWindow.didEnterFullScreenNotification,
+                     NSWindow.didExitFullScreenNotification] {
+            let o = NotificationCenter.default.addObserver(
+                forName: name, object: window, queue: .main
+            ) { [weak self] _ in MainActor.assumeIsolated { self?.reposition() } }
+            observers.append(o)
+        }
 
         // Queue rail opening/closing changes the content area — recenter. @Published
         // fires in willSet, so reading ui.showQueue now gives the OLD value; hop to
@@ -149,7 +157,16 @@ final class PlayerPanelController {
         let contentW = max(f.width - sidebarWidth - rightInset, 0)
         let width = min(maxPillWidth, max(contentW * contentFraction, 260))
         let x = contentX + (contentW - width) / 2
-        let y = f.minY - overhang        // pill's bottom edge; panel extends UP by headroom
+        // The pill's bottom edge hangs BELOW the window (panel extends up by the
+        // headroom). That only works while there's screen left underneath: full
+        // screen — and a window dragged to the bottom of the display — put the
+        // window's bottom edge on the screen's, so the overhang falls off and the
+        // pill gets clipped. Clamp to the screen instead of special-casing full
+        // screen, which fixes both.
+        var y = f.minY - overhang
+        if let screen = host.screen {
+            y = max(y, screen.frame.minY + screenMargin)
+        }
         let rect = NSRect(x: x, y: y, width: width, height: panelHeight)
         if animated {
             NSAnimationContext.runAnimationGroup {
