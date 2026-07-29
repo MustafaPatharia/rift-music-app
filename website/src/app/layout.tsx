@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Fraunces, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import Enhancements from "@/components/Enhancements";
+import { asset } from "@/lib/asset";
 
 const fraunces = Fraunces({
   subsets: ["latin"],
@@ -21,7 +22,7 @@ export const metadata: Metadata = {
   title: "Rift — the Mac-native YouTube Music client",
   description:
     "Rift is a beautiful, fully native macOS YouTube Music client. Liquid Glass UI, a Dynamic Island for your music, offline downloads, on-device lyrics, and local-only stats — the YouTube Music app the Mac never had.",
-  icons: { icon: "/brand/rift-128.png" },
+  icons: { icon: asset("/brand/rift-128.png") },
   alternates: { canonical: "/" },
   robots: { index: true, follow: true },
   keywords: ["Rift", "YouTube Music", "macOS", "Mac music player", "SwiftUI", "Dynamic Island", "native"],

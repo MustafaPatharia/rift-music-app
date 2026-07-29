@@ -10,6 +10,7 @@
 // Reduced-motion → static vertical stack with captions.
 import { useEffect, useRef } from "react";
 import Image from "next/image";
+import { asset } from "@/lib/asset";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
@@ -95,7 +96,7 @@ export default function ScrollDeck() {
         <div className="sd-stage" ref={stage}>
           {SHOTS.map((s) => (
             <figure className="sd-card" key={s.n}>
-              <Image src={`/img/shots/${s.n}.png`} alt={`Rift — ${s.l}`} fill sizes="(max-width: 820px) 92vw, 780px" style={{ objectFit: "cover", objectPosition: "top left" }} />
+              <Image src={asset(`/img/shots/${s.n}.png`)} alt={`Rift — ${s.l}`} fill sizes="(max-width: 820px) 92vw, 780px" style={{ objectFit: "cover", objectPosition: "top left" }} />
               <span className="swap-card-label">{s.l}</span>
               <figcaption className="sd-cap"><b>{s.title}</b> {s.sub}</figcaption>
             </figure>

@@ -1,5 +1,6 @@
 // All page sections (server components → real HTML, no-JS safe).
 import Image from "next/image";
+import { asset } from "@/lib/asset";
 import { Apple, Braces, Download, Lock, Star } from "./icons";
 import { StarButton } from "./Chrome";
 import ScrollDeck from "./ScrollDeck";
@@ -17,7 +18,7 @@ const DIM: Record<string, [number, number]> = {
 function Shot({ name, alt, priority }: { name: keyof typeof DIM | string; alt: string; priority?: boolean }) {
   const [w, h] = DIM[name] ?? [1080, 760];
   return (
-    <Image src={`/img/shots/${name}.png`} alt={alt} width={w} height={h} priority={priority}
+    <Image src={asset(`/img/shots/${name}.png`)} alt={alt} width={w} height={h} priority={priority}
       sizes="(max-width: 900px) 96vw, 880px" />
   );
 }
