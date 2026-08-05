@@ -38,13 +38,18 @@ struct InnerTubeClient {
     // Search filter: songs only. (base64 of the "Songs" chip params.)
     private static let songsFilterParams = "EgWKAQIIAWoKEAkQBRAKEAMQBA%3D%3D"
 
-    private static func context() -> [String: Any] {
-        [
+    private static func context(brandId: String? = nil) -> [String: Any] {
+        var userDict: [String: Any] = [:]
+        if let brandId {
+            userDict["onBehalfOfUser"] = brandId
+        }
+        return [
             "client": [
                 "clientName": clientName,
                 "clientVersion": clientVersion,
                 "hl": "en", "gl": "US",
-            ]
+            ],
+            "user": userDict,
         ]
     }
 
@@ -73,7 +78,7 @@ struct InnerTubeClient {
         }
 
         var full = body
-        full["context"] = context()
+        full["context"] = context(brandId: auth?.brandId)
         req.httpBody = try JSONSerialization.data(withJSONObject: full)
 
         let (data, resp) = try await URLSession.shared.data(for: req)

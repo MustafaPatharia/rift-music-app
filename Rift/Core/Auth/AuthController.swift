@@ -133,7 +133,11 @@ final class AuthController: ObservableObject {
     /// directly instead of calling `accountInfo()`, which returns the Google
     /// account name rather than the YouTube channel identity.
     func completed(_ auth: YTAuth, account: UserAccount? = nil) {
-        AuthStore.save(auth)
+        var authToSave = auth
+        if let account {
+            authToSave.brandId = account.brandId
+        }
+        AuthStore.save(authToSave)
         isAuthenticated = true
         showingLogin = false
         if let account {
