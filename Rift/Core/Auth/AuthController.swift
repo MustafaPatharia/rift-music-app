@@ -41,35 +41,28 @@ final class AuthController: ObservableObject {
     /// account is available (no brands), completes directly. If multiple, sets
     /// `pendingAuth` + `accounts` so the chooser UI can present them.
     func loginCaptured(_ auth: YTAuth) {
-        print("[AuthController] loginCaptured called")
         Task { await fetchAccountsAndPresentChooser(for: auth) }
     }
 
     /// Fetches the accounts list and decides whether to show the chooser.
     private func fetchAccountsAndPresentChooser(for auth: YTAuth) async {
-        print("[AuthController] fetchAccountsAndPresentChooser called")
         isFetchingAccounts = true
         accountsError = nil
         defer { isFetchingAccounts = false }
 
         do {
-            print("[AuthController] Calling InnerTubeClient.fetchAccountsList()...")
             let response = try await InnerTubeClient.fetchAccountsList(auth: auth)
-            print("[AuthController] Accounts list fetched: \(response.accounts.count) accounts")
             if response.hasMultipleAccounts {
-                print("[AuthController] Has multiple accounts, showing chooser")
                 // Show the chooser — don't persist yet.
                 pendingAuth = auth
                 accounts = response.accounts
             } else {
-                print("[AuthController] Single account, completing directly")
                 // Single account (or empty) — complete directly with the
                 // Google login's primary identity.
                 accounts = response.accounts
                 completed(auth)
             }
         } catch {
-            print("[AuthController] fetchAccountsList failed: \(error.localizedDescription)")
             // Fetch failed — show the error in the chooser so the user can
             // either continue with the primary identity or cancel. This keeps
             // the user informed rather than silently logging them in.
@@ -80,28 +73,21 @@ final class AuthController: ObservableObject {
 
     /// Called when the user selects an account from the chooser.
     func selectAccount(_ account: UserAccount) async {
-        print("[AuthController] selectAccount called for: \(account.name) (brandId=\(account.brandId ?? "nil"))")
         guard let auth = pendingAuth else {
-            print("[AuthController] selectAccount: no pendingAuth, aborting")
             return
         }
         // Brand account without a signinURL — can't switch to it. Surface an
         // error so the user can pick another account instead of silently
         // getting the primary identity.
         if account.brandId != nil, account.signinURL == nil {
-            print("[AuthController] selectAccount: brand has no signinURL, aborting")
             accountsError = "This brand account cannot be selected (no switch URL available)."
             return
         }
-        print("[AuthController] selectAccount: signinURL=\(account.signinURL?.absoluteString ?? "nil")")
         do {
-            print("[AuthController] selectAccount: calling GoogleSignInView.selectAccount...")
             let switchedAuth = try await GoogleSignInView.selectAccount(auth: auth, account: account)
-            print("[AuthController] selectAccount: switch succeeded, completing")
             clearChooserState()
             completed(switchedAuth, account: account)
         } catch {
-            print("[AuthController] selectAccount: FAILED — \(error.localizedDescription)")
             accountsError = error.localizedDescription
         }
     }
@@ -167,12 +153,9 @@ final class AuthController: ObservableObject {
 
     /// Pull the signed-in account's name + avatar and persist them.
     func refreshAccount() async {
-        print("[AuthController] refreshAccount() called")
         guard let acc = try? await InnerTubeClient.accountInfo() else {
-            print("[AuthController] refreshAccount: accountInfo() returned nil")
             return
         }
-        print("[AuthController] refreshAccount: accountInfo() returned name=\(acc.name), email=\(acc.email ?? "nil")")
         name = acc.name
         email = acc.email ?? email
         photoURL = acc.photoURL

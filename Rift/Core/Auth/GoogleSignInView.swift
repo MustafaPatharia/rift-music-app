@@ -65,18 +65,14 @@ struct GoogleSignInView: NSViewRepresentable {
     ///   - account: The account to switch to (primary or brand).
     /// - Returns: Updated `YTAuth` with cookies reflecting the selected identity.
     static func selectAccount(auth: YTAuth, account: UserAccount) async throws -> YTAuth {
-        print("[GoogleSignInView] selectAccount called for: \(account.name) (brandId=\(account.brandId ?? "nil"))")
         // No signin URL → no navigation needed (primary already active).
         guard let signinURL = account.signinURL else {
-            print("[GoogleSignInView] No signinURL, returning original auth")
             return auth
         }
         guard AccountsListParser.isAllowedSigninURL(signinURL) else {
-            print("[GoogleSignInView] signinURL not allowed, returning original auth")
             return auth
         }
 
-        print("[GoogleSignInView] Navigating to signinURL: \(signinURL.absoluteString)")
 
         // Use the same persistent data store as the sign-in webview so the
         // signinURL navigation mutates the shared cookie session.
@@ -97,23 +93,18 @@ struct GoogleSignInView: NSViewRepresentable {
         try Task.checkCancellation()
 
         // Navigate to the signinURL — this re-points the delegated identity.
-        print("[GoogleSignInView] Starting navigation...")
         try await driver.load(signinURL, in: webView, timeout: .seconds(20))
-        print("[GoogleSignInView] Navigation completed")
 
         // Verify the identity switch via ytcfg.DATASYNC_ID. The page's ytcfg may
         // be emitted slightly after didFinish; poll briefly.
         var verified = false
         for attempt in 0 ..< 5 {
             if let dataSyncId = try? await readDataSyncId(from: webView) {
-                print("[GoogleSignInView] DATASYNC_ID attempt \(attempt): \(dataSyncId)")
                 if dataSyncIdMatches(dataSyncId, expectedBrandId: account.brandId) {
-                    print("[GoogleSignInView] Identity verified!")
                     verified = true
                     break
                 }
             } else {
-                print("[GoogleSignInView] DATASYNC_ID attempt \(attempt): read failed")
             }
             if attempt < 4 {
                 try await Task.sleep(for: .milliseconds(400))
@@ -121,23 +112,13 @@ struct GoogleSignInView: NSViewRepresentable {
         }
 
         if !verified {
-            print("[GoogleSignInView] WARNING: Identity verification failed, proceeding anyway")
         }
 
         // Re-capture cookies from the shared data store.
-        print("[GoogleSignInView] Re-capturing cookies...")
         let result = try await captureAuth(from: cfg.websiteDataStore)
-        print("[GoogleSignInView] Re-capture succeeded")
         // Compare original vs re-captured auth to see if cookies actually changed.
         let originalCookieShort = String(auth.cookie.hash)
         let newCookieShort = String(result.cookie.hash)
-        print("[GoogleSignInView] Original cookie hash: \(originalCookieShort)")
-        print("[GoogleSignInView] New cookie hash: \(newCookieShort)")
-        print("[GoogleSignInView] Cookies changed: \(originalCookieShort != newCookieShort)")
-        print("[GoogleSignInView] Original sapisid hash: \(String(auth.sapisid.hash))")
-        print("[GoogleSignInView] New sapisid hash: \(String(result.sapisid.hash))")
-        print("[GoogleSignInView] Original cookie length: \(auth.cookie.count)")
-        print("[GoogleSignInView] New cookie length: \(result.cookie.count)")
         return result
     }
 
@@ -185,9 +166,7 @@ struct GoogleSignInView: NSViewRepresentable {
             store.httpCookieStore.getAllCookies { cookies in
                 let yt = cookies.filter { $0.domain.hasSuffix("youtube.com") }
                 let names = Set(yt.map(\.name))
-                print("[GoogleSignInView] captureAuth: \(yt.count) youtube cookies: \(names.sorted())")
                 guard names.contains("__Secure-3PSID") else {
-                    print("[GoogleSignInView] captureAuth: missing __Secure-3PSID")
                     continuation.resume(throwing: NSError(
                         domain: "GoogleSignIn", code: 1,
                         userInfo: [NSLocalizedDescriptionKey: "No YouTube session cookie after account switch"]))

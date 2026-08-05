@@ -236,10 +236,8 @@ struct InnerTubeClient {
     /// `getMultiPageMenuAction` → `multiPageMenuRenderer` sections. Needs auth
     /// cookies. Used by the login-time account chooser.
     static func fetchAccountsList(auth: YTAuth? = nil) async throws -> AccountsListResponse {
-        print("[InnerTubeClient] fetchAccountsList() called")
         let json = try await request("account/accounts_list", body: [:], auth: auth)
         let response = AccountsListParser.parse(json)
-        print("[InnerTubeClient] fetchAccountsList() returned \(response.accounts.count) accounts")
         return response
     }
 

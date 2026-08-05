@@ -33,8 +33,6 @@ enum AccountsListParser {
     /// - Returns: An `AccountsListResponse` containing parsed accounts,
     ///   or an empty response on failure.
     static func parse(_ json: [String: Any]) -> AccountsListResponse {
-        print("[AccountsListParser] parse() called")
-        print("[AccountsListParser] Top keys: \(json.keys.sorted())")
         // Navigate to the multi-page menu renderer.
         guard let actions = json["actions"] as? [[String: Any]],
               let firstAction = actions.first,
@@ -80,7 +78,6 @@ enum AccountsListParser {
             }
         }
 
-        print("[AccountsListParser] parse() completed with \(accounts.count) accounts")
         return AccountsListResponse(googleEmail: googleEmail, accounts: accounts)
     }
 
