@@ -48,7 +48,7 @@ struct InnerTubeClient {
         ]
     }
 
-    private static func request(_ endpoint: String, body: [String: Any]) async throws -> [String: Any] {
+    private static func request(_ endpoint: String, body: [String: Any], auth overrideAuth: YTAuth? = nil) async throws -> [String: Any] {
         guard let url = URL(string: "\(base)/\(endpoint)?prettyPrint=false") else {
             throw URLError(.badURL)
         }
@@ -63,8 +63,10 @@ struct InnerTubeClient {
             forHTTPHeaderField: "User-Agent")
 
         // Authenticated? Attach the YTM session so browse/home returns the
-        // user's personalized feed, library, and subscriptions.
-        if let auth = AuthStore.load() {
+        // user's personalized feed, library, and subscriptions. An explicit
+        // override is used during login (before the session is saved to Keychain).
+        let auth = overrideAuth ?? AuthStore.load()
+        if let auth {
             req.setValue(auth.cookie, forHTTPHeaderField: "Cookie")
             req.setValue(sapisidHash(auth.sapisid), forHTTPHeaderField: "Authorization")
             req.setValue("0", forHTTPHeaderField: "X-Goog-AuthUser")
@@ -222,6 +224,18 @@ struct InnerTubeClient {
         return Account(name: name.isEmpty ? "YouTube Music" : name,
                        photoURL: photo,
                        email: email.isEmpty ? nil : email)
+    }
+
+    /// The list of available accounts (primary + brand accounts) for the
+    /// authenticated user. Ref: ytmusicapi `account/accounts_list` →
+    /// `getMultiPageMenuAction` → `multiPageMenuRenderer` sections. Needs auth
+    /// cookies. Used by the login-time account chooser.
+    static func fetchAccountsList(auth: YTAuth? = nil) async throws -> AccountsListResponse {
+        print("[InnerTubeClient] fetchAccountsList() called")
+        let json = try await request("account/accounts_list", body: [:], auth: auth)
+        let response = AccountsListParser.parse(json)
+        print("[InnerTubeClient] fetchAccountsList() returned \(response.accounts.count) accounts")
+        return response
     }
 
     private static func biggestThumb(in node: Any) -> URL? {
